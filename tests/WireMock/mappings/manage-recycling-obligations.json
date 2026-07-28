@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/returns",
+    "queryParameters": {
+      "year": {
+        "equalTo": "2026"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "method": "POST",
+      "path": "/returns",
+      "query": "?year=2026"
+    }
+  }
+}

@@ -39,7 +39,7 @@ varies. If a future deployment serves more than one public domain, add `Hosts` b
 
 ### Manage Recycling Obligations
 
-The agreed public prefix is `/manage-recycling-obligations`. The target YARP configuration is:
+The agreed public prefix is `/manage-recycling-obligations`. The YARP configuration is:
 
 ```json
 {
@@ -86,11 +86,8 @@ Downstream request: POST https://manage-recycling-obligations.production.interna
 
 No `Methods` constraint is configured, so the permitted path accepts every HTTP method, including `POST`. The
 `{**catch-all}` path segment permits every suffix beneath `/manage-recycling-obligations`; use additional exact
-routes with `Methods` restrictions if individual downstream operations need a narrower allow-list. Once this
-configuration is applied, paths that do not match a permitted route return `404` from the proxy.
-
-> The application currently retains its generic bootstrap route in `src/Api/appsettings.json`. Replace it with the
-> configuration above when the first downstream address is known; do not retain the bootstrap root catch-all route.
+routes with `Methods` restrictions if individual downstream operations need a narrower allow-list. Paths that do not
+match a permitted route return `404` from the proxy without reaching a downstream service.
 
 ## Run locally
 
@@ -105,11 +102,42 @@ Then check the local endpoint:
 curl http://localhost:8085/health
 ```
 
-## Container
+## Compose demonstration
 
 ```sh
-docker build --tag spike-report-packaging-proxy .
-docker run --rm -p 8085:8085 \
-  -e ReverseProxy__Clusters__backend__Destinations__primary__Address=http://host.docker.internal:8080/ \
-  spike-report-packaging-proxy
+docker compose up --build -d --wait
+```
+
+Compose starts the proxy and one WireMock downstream. The proxy's destination is overridden to `http://downstream:8080/`;
+WireMock returns the expected canned response for `POST /returns?year=2026`. This demonstrates that the proxy removed
+the public prefix before forwarding.
+
+```sh
+curl --fail --request POST 'http://localhost:8085/manage-recycling-obligations/returns?year=2026'
+curl --include http://localhost:8085/not-permitted
+```
+
+The first command returns the WireMock response below. The second returns `404 Not Found`, even though WireMock has a
+deliberate sentry response for `/not-permitted`; this proves the proxy did not forward the unpermitted path.
+
+```json
+{
+  "method": "POST",
+  "path": "/returns",
+  "query": "?year=2026"
+}
+```
+
+Stop the environment when finished:
+
+```sh
+docker compose down -v --remove-orphans
+```
+
+## Tests
+
+Start the Compose environment first, then run the integration tests:
+
+```sh
+dotnet test tests/Api.IntegrationTests/Api.IntegrationTests.csproj --no-restore
 ```

@@ -31,5 +31,13 @@ jobs:
         run: dotnet csharpier check .
       - name: Build
         run: dotnet build spike-report-packaging-proxy.slnx --no-restore --warnaserror
-      - name: Check Docker image builds
-        run: docker build --no-cache --tag spike-report-packaging-proxy .
+      - name: Start local environment
+        run: docker compose up --build -d --wait
+      - name: Run integration tests
+        run: dotnet test tests/Api.IntegrationTests/Api.IntegrationTests.csproj --no-restore
+      - name: Docker compose logs
+        if: always()
+        run: docker compose logs
+      - name: Stop local environment
+        if: always()
+        run: docker compose down -v --remove-orphans

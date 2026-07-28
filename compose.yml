@@ -1,0 +1,21 @@
+services:
+  downstream:
+    image: wiremock/wiremock:3.13.2-3
+    volumes:
+      - ./tests/WireMock/mappings:/home/wiremock/mappings:ro
+
+  proxy:
+    build: .
+    ports:
+      - "8085:8085"
+    environment:
+      PORT: 8085
+      ReverseProxy__Clusters__ManageRecyclingObligations__Destinations__Primary__Address: http://downstream:8080/
+    depends_on:
+      downstream:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8085/health"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
