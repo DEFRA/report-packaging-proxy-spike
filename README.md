@@ -94,7 +94,7 @@ match a permitted route return `404` from the proxy without reaching a downstrea
 
 ```sh
 dotnet restore spike-report-packaging-proxy.slnx
-dotnet run --project src/Api
+dotnet run --project src/ReverseProxy
 ```
 
 Then check the local endpoint:
@@ -140,11 +140,11 @@ docker compose down -v --remove-orphans
 Run the startup-validation unit tests without Docker:
 
 ```sh
-dotnet test tests/Api.Tests/Api.Tests.csproj --no-restore
+dotnet test tests/ReverseProxy.Tests/ReverseProxy.Tests.csproj --no-restore
 ```
 
 Start the Compose environment before running the routing integration tests:
 
 ```sh
-dotnet test tests/Api.IntegrationTests/Api.IntegrationTests.csproj --no-restore
+dotnet test tests/ReverseProxy.IntegrationTests/ReverseProxy.IntegrationTests.csproj --no-restore
 ```

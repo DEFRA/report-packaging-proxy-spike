@@ -30,9 +30,9 @@
 
 ## Test guidance
 
-- Run unit tests with `DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE=1 dotnet test tests/Api.Tests/Api.Tests.csproj --no-restore -m:1 -nodeReuse:false --disable-build-servers -v:minimal`.
+- Run unit tests with `DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE=1 dotnet test tests/ReverseProxy.Tests/ReverseProxy.Tests.csproj --no-restore -m:1 -nodeReuse:false --disable-build-servers -v:minimal`.
 - Keep integration tests focused on real integration boundaries. This service's routing tests run against the Docker Compose proxy and WireMock downstream.
 - Start the local environment with `docker compose up --build -d --wait`.
-- Run the integration tests with `DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE=1 dotnet test tests/Api.IntegrationTests/Api.IntegrationTests.csproj --no-restore -m:1 -nodeReuse:false --disable-build-servers -v:minimal`.
+- Run the integration tests with `DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE=1 dotnet test tests/ReverseProxy.IntegrationTests/ReverseProxy.IntegrationTests.csproj --no-restore -m:1 -nodeReuse:false --disable-build-servers -v:minimal`.
 - Stop the local environment with `docker compose down -v --remove-orphans`.
 - In the sandbox environment, integration tests need escalation because VSTest binds a local socket and the tests access Docker Compose services.

@@ -1,8 +1,8 @@
 using AwesomeAssertions;
-using Defra.Spike.ReportPackagingProxy.Api.Configuration;
+using Defra.Spike.ReportPackagingProxy.ReverseProxy.Configuration;
 using Microsoft.Extensions.Configuration;
 
-namespace Defra.Spike.ReportPackagingProxy.Api.Tests.Configuration;
+namespace Defra.Spike.ReportPackagingProxy.ReverseProxy.Tests.Configuration;
 
 public class ReverseProxyConfigurationValidatorTests
 {
