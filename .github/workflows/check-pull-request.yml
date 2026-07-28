@@ -31,6 +31,8 @@ jobs:
         run: dotnet csharpier check .
       - name: Build
         run: dotnet build spike-report-packaging-proxy.slnx --no-restore --warnaserror
+      - name: Run unit tests
+        run: dotnet test tests/Api.Tests/Api.Tests.csproj --no-restore
       - name: Start local environment
         run: docker compose up --build -d --wait
       - name: Run integration tests

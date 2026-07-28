@@ -19,6 +19,7 @@
 - Before adding an endpoint or changing proxy behaviour, compare the nearest existing implementation. If the change needs a one-off request, validation, error-response, or documentation pattern, pause and ask the user before introducing it.
 - Keep `GET /health` local to this service. It is a CDP platform health-check contract and must continue to return HTTP 200 with `{ "message": "success" }`.
 - Preserve forwarding for all HTTP methods unless a route explicitly restricts them. In particular, do not accidentally exclude `POST` requests.
+- Keep `unconfigured.invalid` as a fail-closed destination placeholder. Startup validation must reject it in every configured YARP destination.
 - Check work has been successful by building the solution.
 
 ## Build guidance
@@ -29,6 +30,7 @@
 
 ## Test guidance
 
+- Run unit tests with `DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE=1 dotnet test tests/Api.Tests/Api.Tests.csproj --no-restore -m:1 -nodeReuse:false --disable-build-servers -v:minimal`.
 - Keep integration tests focused on real integration boundaries. This service's routing tests run against the Docker Compose proxy and WireMock downstream.
 - Start the local environment with `docker compose up --build -d --wait`.
 - Run the integration tests with `DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE=1 dotnet test tests/Api.IntegrationTests/Api.IntegrationTests.csproj --no-restore -m:1 -nodeReuse:false --disable-build-servers -v:minimal`.

@@ -70,8 +70,9 @@ The agreed public prefix is `/manage-recycling-obligations`. The YARP configurat
 }
 ```
 
-`https://unconfigured.invalid/` is a fail-closed placeholder. The deployed service must override it with the full
-base address of the relevant environment's Manage Recycling Obligations service, including a trailing slash.
+`https://unconfigured.invalid/` is a fail-closed placeholder. Startup validation prevents the proxy from running
+until every destination has been overridden with the full base address of the relevant environment's Manage Recycling
+Obligations service, including a trailing slash.
 
 ```text
 ReverseProxy__Clusters__ManageRecyclingObligations__Destinations__Primary__Address=https://manage-recycling-obligations.production.internal/
@@ -136,7 +137,13 @@ docker compose down -v --remove-orphans
 
 ## Tests
 
-Start the Compose environment first, then run the integration tests:
+Run the startup-validation unit tests without Docker:
+
+```sh
+dotnet test tests/Api.Tests/Api.Tests.csproj --no-restore
+```
+
+Start the Compose environment before running the routing integration tests:
 
 ```sh
 dotnet test tests/Api.IntegrationTests/Api.IntegrationTests.csproj --no-restore

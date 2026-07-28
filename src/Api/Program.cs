@@ -1,3 +1,5 @@
+using Defra.Spike.ReportPackagingProxy.Api.Configuration;
+
 var builder = WebApplication.CreateBuilder(args);
 
 var port = builder.Configuration["PORT"];
@@ -6,7 +8,9 @@ if (int.TryParse(port, out var configuredPort))
     builder.WebHost.ConfigureKestrel(options => options.ListenAnyIP(configuredPort));
 }
 
-builder.Services.AddReverseProxy().LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+var reverseProxyConfiguration = builder.Configuration.GetSection("ReverseProxy");
+ReverseProxyConfigurationValidator.Validate(reverseProxyConfiguration);
+builder.Services.AddReverseProxy().LoadFromConfig(reverseProxyConfiguration);
 
 var app = builder.Build();
 
