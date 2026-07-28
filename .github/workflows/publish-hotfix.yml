@@ -1,0 +1,43 @@
+name: Publish Hot Fix
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: $${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: false
+  queue: max
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+
+env:
+  AWS_REGION: eu-west-2
+  AWS_ACCOUNT_ID: '094954420758'
+
+jobs:
+  build:
+    name: CDP-build-hotfix-workflow
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Build and validate
+        run: |
+          dotnet tool restore
+          dotnet restore spike-report-packaging-proxy.slnx
+          dotnet csharpier check .
+          dotnet build spike-report-packaging-proxy.slnx --no-restore --warnaserror
+      # Publishing is intentionally disabled until this service is ready to release.
+      # - name: Publish Hot Fix
+      #   uses: DEFRA/cdp-build-action/build-hotfix@main
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}

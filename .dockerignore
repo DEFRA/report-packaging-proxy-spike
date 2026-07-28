@@ -1,0 +1,9 @@
+.git
+.github
+.idea
+.vs
+bin
+obj
+**/bin
+**/obj
+README.md

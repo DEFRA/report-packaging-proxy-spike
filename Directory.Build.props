@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup>
+    <RootNamespace>Defra.Spike.ReportPackagingProxy</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+</Project>

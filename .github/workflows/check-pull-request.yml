@@ -1,0 +1,35 @@
+name: Check Pull Request
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+  workflow_dispatch:
+
+jobs:
+  pr-validator:
+    name: Run Pull Request Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore tools and dependencies
+        run: |
+          dotnet tool restore
+          dotnet restore spike-report-packaging-proxy.slnx
+      - name: Check formatting
+        run: dotnet csharpier check .
+      - name: Build
+        run: dotnet build spike-report-packaging-proxy.slnx --no-restore --warnaserror
+      - name: Check Docker image builds
+        run: docker build --no-cache --tag spike-report-packaging-proxy .
