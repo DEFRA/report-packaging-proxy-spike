@@ -6,6 +6,11 @@
       "year": {
         "equalTo": "2026"
       }
+    },
+    "headers": {
+      "X-Forwarded-Prefix": {
+        "equalTo": "/manage-recycling-obligations"
+      }
     }
   },
   "response": {

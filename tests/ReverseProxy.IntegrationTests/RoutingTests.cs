@@ -7,7 +7,7 @@ namespace Defra.Spike.ReportPackagingProxy.ReverseProxy.IntegrationTests;
 public class RoutingTests : IntegrationTestBase
 {
     [Fact]
-    public async Task ManageRecyclingObligations_ShouldRemovePublicPrefix()
+    public async Task ManageRecyclingObligations_ShouldRemovePublicPrefixAndForwardIt()
     {
         using var client = CreateClient();
 

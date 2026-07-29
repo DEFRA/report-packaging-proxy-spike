@@ -52,7 +52,15 @@ The agreed public prefix is `/manage-recycling-obligations`. The YARP configurat
         },
         "Transforms": [
           {
+            "X-Forwarded": "Set",
+            "Prefix": "Off"
+          },
+          {
             "PathRemovePrefix": "/manage-recycling-obligations"
+          },
+          {
+            "RequestHeader": "X-Forwarded-Prefix",
+            "Set": "/manage-recycling-obligations"
           }
         ]
       }
@@ -83,7 +91,19 @@ For example, the transform forwards the request below without the public routing
 ```text
 Public request:     POST /manage-recycling-obligations/returns?year=2026
 Downstream request: POST https://manage-recycling-obligations.production.internal/returns?year=2026
+                    X-Forwarded-Prefix: /manage-recycling-obligations
 ```
+
+`X-Forwarded-Prefix` tells the downstream service which public prefix the proxy removed. YARP's default prefix
+transform is disabled for this route because it takes its value from `PathBase`, which is empty here and would remove
+the explicit header. The other standard `X-Forwarded-*` headers remain enabled. The downstream should trust forwarded
+headers only when it can be reached through the proxy or another trusted private-network component.
+
+The service assumes ingress is the only route to the proxy. Under that assumption, a client-supplied
+`X-Forwarded-Host`, `X-Forwarded-Proto`, or `X-Forwarded-Prefix` is not passed through unchanged: YARP sets the host
+and protocol headers from the request it receives, and this route sets the prefix to
+`/manage-recycling-obligations`. Ingress must enforce the expected host name because YARP derives
+`X-Forwarded-Host` from the incoming `Host` header.
 
 No `Methods` constraint is configured, so the permitted path accepts every HTTP method, including `POST`. The
 `{**catch-all}` path segment permits every suffix beneath `/manage-recycling-obligations`; use additional exact
@@ -111,7 +131,7 @@ docker compose up --build -d --wait
 
 Compose starts the proxy and one WireMock downstream. The proxy's destination is overridden to `http://downstream:8080/`;
 WireMock returns the expected canned response for `POST /returns?year=2026`. This demonstrates that the proxy removed
-the public prefix before forwarding.
+the public prefix before forwarding and supplied it in `X-Forwarded-Prefix`.
 
 ```sh
 curl --fail --request POST 'http://localhost:8085/manage-recycling-obligations/returns?year=2026'
