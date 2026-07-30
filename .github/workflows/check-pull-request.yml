@@ -26,11 +26,11 @@ jobs:
       - name: Restore tools and dependencies
         run: |
           dotnet tool restore
-          dotnet restore spike-report-packaging-proxy.slnx
+          dotnet restore report-packaging-proxy-spike.slnx
       - name: Check formatting
         run: dotnet csharpier check .
       - name: Build
-        run: dotnet build spike-report-packaging-proxy.slnx --no-restore --warnaserror
+        run: dotnet build report-packaging-proxy-spike.slnx --no-restore --warnaserror
       - name: Run unit tests
         run: dotnet test tests/ReverseProxy.Tests/ReverseProxy.Tests.csproj --no-restore
       - name: Start local environment

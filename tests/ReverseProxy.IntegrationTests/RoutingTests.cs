@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using AwesomeAssertions;
 
-namespace Defra.Spike.ReportPackagingProxy.ReverseProxy.IntegrationTests;
+namespace Defra.ReportPackagingProxySpike.ReverseProxy.IntegrationTests;
 
 public class RoutingTests : IntegrationTestBase
 {

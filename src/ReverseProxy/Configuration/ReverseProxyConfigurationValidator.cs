@@ -1,4 +1,4 @@
-namespace Defra.Spike.ReportPackagingProxy.ReverseProxy.Configuration;
+namespace Defra.ReportPackagingProxySpike.ReverseProxy.Configuration;
 
 internal static class ReverseProxyConfigurationValidator
 {

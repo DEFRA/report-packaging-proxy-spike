@@ -1,4 +1,4 @@
-using Defra.Spike.ReportPackagingProxy.ReverseProxy.Configuration;
+using Defra.ReportPackagingProxySpike.ReverseProxy.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 

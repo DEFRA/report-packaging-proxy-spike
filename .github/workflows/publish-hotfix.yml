@@ -33,9 +33,9 @@ jobs:
       - name: Build and validate
         run: |
           dotnet tool restore
-          dotnet restore spike-report-packaging-proxy.slnx
+          dotnet restore report-packaging-proxy-spike.slnx
           dotnet csharpier check .
-          dotnet build spike-report-packaging-proxy.slnx --no-restore --warnaserror
+          dotnet build report-packaging-proxy-spike.slnx --no-restore --warnaserror
       - name: Run unit tests
         run: dotnet test tests/ReverseProxy.Tests/ReverseProxy.Tests.csproj --no-restore
       - name: Start local environment
@@ -48,8 +48,7 @@ jobs:
       - name: Stop local environment
         if: always()
         run: docker compose down -v --remove-orphans
-      # Publishing is intentionally disabled until this service is ready to release.
-      # - name: Publish Hot Fix
-      #   uses: DEFRA/cdp-build-action/build-hotfix@main
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish Hot Fix
+        uses: DEFRA/cdp-build-action/build-hotfix@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -25,7 +25,7 @@
 ## Build guidance
 
 - In the sandbox environment, avoid plain `dotnet build` because it can hang or take significantly longer due to workload notification and build-server delays.
-- Build with `DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE=1 dotnet build spike-report-packaging-proxy.slnx --no-restore -m:1 -nodeReuse:false --disable-build-servers -v:minimal`.
+- Build with `DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE=1 dotnet build report-packaging-proxy-spike.slnx --no-restore -m:1 -nodeReuse:false --disable-build-servers -v:minimal`.
 - If a build is unexpectedly slow, stop it, run `dotnet build-server shutdown`, and retry the sandbox build command above.
 
 ## Test guidance

@@ -1,4 +1,4 @@
-namespace Defra.Spike.ReportPackagingProxy.ReverseProxy.IntegrationTests;
+namespace Defra.ReportPackagingProxySpike.ReverseProxy.IntegrationTests;
 
 [Trait("Category", "IntegrationTests")]
 public abstract class IntegrationTestBase

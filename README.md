@@ -1,7 +1,6 @@
 # Report packaging proxy
 
-A .NET 10 YARP reverse proxy prepared for the CDP build and deployment approach used by
-`cdp-node-frontend-template`.
+A .NET 10 YARP reverse proxy prepared for the CDP build and deployment approach.
 
 ## Behaviour
 
@@ -113,7 +112,7 @@ match a permitted route return `404` from the proxy without reaching a downstrea
 ## Run locally
 
 ```sh
-dotnet restore spike-report-packaging-proxy.slnx
+dotnet restore report-packaging-proxy-spike.slnx
 dotnet run --project src/ReverseProxy
 ```
 
