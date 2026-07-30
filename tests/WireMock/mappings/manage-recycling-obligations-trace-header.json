@@ -1,0 +1,31 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/trace-returns",
+    "queryParameters": {
+      "year": {
+        "equalTo": "2026"
+      }
+    },
+    "headers": {
+      "X-Forwarded-Prefix": {
+        "equalTo": "/manage-recycling-obligations"
+      },
+      "x-cdp-request-id": {
+        "equalTo": "4d2b9f4e-24de-467a-951f-342579445b2a"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "method": "POST",
+      "path": "/trace-returns",
+      "query": "?year=2026",
+      "correlationId": "4d2b9f4e-24de-467a-951f-342579445b2a"
+    }
+  }
+}

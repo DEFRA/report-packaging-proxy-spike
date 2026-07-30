@@ -16,4 +16,12 @@
     </PackageReference>
     <PackageReference Include="xunit.v3" Version="3.2.2" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content
+      Include="../../src/ReverseProxy/appsettings.json"
+      Link="appsettings.json"
+      CopyToOutputDirectory="PreserveNewest"
+    />
+  </ItemGroup>
 </Project>

@@ -9,6 +9,7 @@ services:
     ports:
       - "8085:8085"
     environment:
+      ASPNETCORE_ENVIRONMENT: Development
       PORT: 8085
       ReverseProxy__Clusters__ManageRecyclingObligations__Destinations__Primary__Address: http://downstream:8080/
     depends_on:
