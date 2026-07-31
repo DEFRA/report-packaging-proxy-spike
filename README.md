@@ -2,6 +2,8 @@
 
 A .NET 10 YARP reverse proxy prepared for the CDP build and deployment approach.
 
+See the [spike outcome](docs/spike-outcome.md) for the evidence, recommendation, and follow-up considerations.
+
 ## Behaviour
 
 - `GET /health` is handled by this service and returns `200 OK` with `{ "message": "success" }`.
@@ -9,7 +11,7 @@ A .NET 10 YARP reverse proxy prepared for the CDP build and deployment approach.
 
 ## Permitted-route design
 
-The proxy will be a permit list: a request may be sent only to a downstream service with an explicitly configured
+The proxy is a permit list: a request may be sent only to a downstream service with an explicitly configured
 public path. The first known mapping is **Manage Recycling Obligations**.
 
 ```mermaid
