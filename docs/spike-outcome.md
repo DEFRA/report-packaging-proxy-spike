@@ -139,6 +139,28 @@ To add the example service:
    propagation, and an unpermitted path. Build and deploy the proxy, then verify request correlation and downstream
    behaviour in CDP.
 
+## Runtime comparison: .NET and Node.js
+
+This is a runtime comparison rather than a comparison of YARP with a particular Node.js proxy library. Both runtimes
+can provide a capable reverse proxy, but their execution models have different operational characteristics.
+
+| Runtime concern | .NET / Kestrel | Node.js | Reverse-proxy implication |
+| --- | --- | --- | --- |
+| Use of CPU cores | Thread pool and server GC are designed to use multiple cores within one process. | JavaScript runs on one event loop per process; full core use normally needs clustered processes or worker threads. | .NET has a simpler path to scaling a single proxy instance across available CPU. |
+| High-concurrency I/O | Async I/O runs independently of application threads; blocked work is less likely to stop every connection. | Excellent async I/O model, but synchronous JavaScript on the event loop delays all requests served by that process. | .NET is more tolerant of occasional CPU-bound transforms, logging, or accidental blocking work. |
+| Tail latency under load | Multiple worker threads can continue serving requests while another thread is busy. | A long event-loop task can raise latency for unrelated requests in the same process. | .NET is generally the safer runtime for predictable latency in a shared routing service. |
+| Streaming large request and response bodies | Async pipelines support streaming with backpressure and minimal copying. | Streams also support this well. | Broadly comparable; both need careful implementation to avoid buffering bodies. |
+| CPU work in the request path | Can execute concurrently across threads. | Must be kept off the event loop or moved to workers or processes. | .NET has less operational complexity if transforms, authentication, logging, or policy checks become CPU-heavy. |
+| Garbage collection | Server GC is intended for throughput and multi-core server workloads and can be tuned for containers. | V8 has an efficient generational GC, but a pause or memory pressure affects the process's sole event loop. | Neither is immune to GC effects; .NET gives more server-oriented tuning options. |
+| Fault isolation | A problematic request handler can consume threads, but other threads remain available. | A blocking handler affects every request handled by that event-loop process. | .NET reduces the blast radius of a badly behaved synchronous extension. |
+| Process model | One process can efficiently use allocated CPU. | Multiple Node processes are commonly needed for equivalent CPU utilisation. | .NET tends to need less process-management configuration. |
+| Startup time and baseline memory | Usually higher startup cost and memory footprint. | Often starts faster and has a smaller baseline footprint. | Node.js can be preferable for very small, bursty workloads. |
+| Raw throughput | Typically very strong for HTTP workloads, especially with multiple cores available. | Also strong for I/O-heavy workloads when handlers remain lightweight and non-blocking. | Benchmark representative headers, TLS, payload sizes, and concurrency; do not rely on generic benchmark claims. |
+
+The runtime argument for .NET is not that Node.js cannot proxy traffic. It is that a proxy is a shared,
+latency-sensitive service, and .NET's multi-core execution model is more forgiving and operationally simpler as
+routing, logging, security checks, and downstream policy accumulate.
+
 ## Recommendation
 
 Create a CDP proxy service for each logical group of downstream services. Start each service from this repository's
