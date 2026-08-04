@@ -99,6 +99,46 @@ The Code Owners approval gate on configuration changes provides a meaningful con
 would redirect or break a downstream routing path. It is a governance safeguard, rather than a replacement for
 operational validation and monitoring.
 
+## Example deployed state and adding a service
+
+The diagram below shows the intended deployed pattern. Manage Recycling Obligations is the current route. The
+`/example-service` route and `new-downstream-service` are illustrative additions; they show how a further service
+would be exposed through the same proxy.
+
+```mermaid
+flowchart LR
+    user["User"] --> ingress["CDP ingress\nreport-packaging public domain"]
+    proxy["Report packaging proxy\nYARP"]
+    obligations["waste-obligations-frontend\nManage Recycling Obligations"]
+    example["new-downstream-service\nExample service"]
+
+    ingress --> proxy
+    proxy -->|"/manage-recycling-obligations/..."| obligations
+    proxy -->|"/example-service/..."| example
+```
+
+To add the example service:
+
+1. Agree the public path, for example `/example-service`, the downstream's internal base address, and the user
+   journey that will reach it. Retain the permit-list model: do not use a catch-all route that would expose unrelated
+   downstream paths.
+2. Add an `ExampleService` route and cluster to the proxy configuration. Match
+   `/example-service/{**catch-all}`, remove `/example-service` before forwarding, and set
+   `X-Forwarded-Prefix` to `/example-service`. Use the current Manage Recycling Obligations route as the template.
+3. Give the cluster a default `https://unconfigured.invalid/` destination. The existing startup validation then
+   prevents deployment until the destination has been overridden.
+4. Add the `ReverseProxy__Clusters__ExampleService__Destinations__Primary__Address` setting to each required
+   `cdp-app-config` environment, using the private downstream base address with its trailing slash. The normal
+   Code Owners approval gate protects these routing changes.
+5. Make the downstream ready to run behind the prefix. It must trust forwarded headers only from the proxy and use
+   the forwarded prefix when generating any public URLs, redirects, authentication callbacks, assets, or cookie
+   paths that are affected by the public route.
+6. Add the downstream service to the relevant `epr-local-environment` profile and configure the local proxy
+   destination. Exercise both the downstream journey and the client service that will call its new public path.
+7. Add routing and end-to-end tests for the permitted path, prefix removal, all required HTTP methods, trace-header
+   propagation, and an unpermitted path. Build and deploy the proxy, then verify request correlation and downstream
+   behaviour in CDP.
+
 ## Recommendation
 
 Create a CDP proxy service for each logical group of downstream services. Start each service from this repository's
@@ -112,6 +152,63 @@ An extended `/health/all` endpoint could report downstream availability while re
 contract. Alternatively, a background process could continuously check downstream availability and publish custom
 metrics or alarms. These would be useful enhancements, but are not prerequisites for adopting the routing pattern.
 
-The hard `404` for an unmatched path is correct for the proxy's security and routing model. Its user impact still
-needs deliberate consideration: entry points, navigation, authentication return URLs, error handling, and user
-messaging must not leave users with a confusing journey when a path is missing or incorrect.
+### Convention-based downstream destinations
+
+The proxy could remove the need for a per-destination address in `cdp-app-config` if CDP guarantees a stable,
+environment-specific naming convention. Each destination would instead declare only its service name, for example:
+
+```json
+{
+  "Destinations": {
+    "Primary": {
+      "ServiceName": "waste-obligations-frontend"
+    }
+  }
+}
+```
+
+At startup, a small resolver could combine the service name with one platform-provided environment variable, such as
+`CDP_ENVIRONMENT=dev`, to populate the YARP address before configuration validation and `LoadFromConfig` run:
+
+```csharp
+var reverseProxyConfiguration = builder.Configuration.GetSection("ReverseProxy");
+var cdpEnvironment = builder.Configuration["CDP_ENVIRONMENT"]
+    ?? throw new InvalidOperationException("CDP_ENVIRONMENT must be configured.");
+
+var addressOverrides = reverseProxyConfiguration
+    .GetSection("Clusters")
+    .GetChildren()
+    .SelectMany(cluster =>
+        cluster.GetSection("Destinations").GetChildren().Select(destination => new
+        {
+            Key = $"ReverseProxy:Clusters:{cluster.Key}:Destinations:{destination.Key}:Address",
+            ServiceName = destination["ServiceName"]
+                ?? throw new InvalidOperationException($"{cluster.Key}:{destination.Key} must have a service name."),
+        })
+    )
+    .ToDictionary(
+        x => x.Key,
+        x => $"https://{x.ServiceName}.{cdpEnvironment}.cdp.cloud/"
+    );
+
+builder.Configuration.AddInMemoryCollection(addressOverrides);
+reverseProxyConfiguration = builder.Configuration.GetSection("ReverseProxy");
+ReverseProxyConfigurationValidator.Validate(reverseProxyConfiguration);
+builder.Services.AddReverseProxy().LoadFromConfig(reverseProxyConfiguration);
+```
+
+This is technically possible because the final YARP configuration can be composed at service startup; it remains
+static for the life of that process. The resolver must run before startup validation so that a missing environment or
+service name fails fast, and it should have focused unit tests for every supported naming pattern.
+
+The exact host template must be confirmed with the CDP platform before adopting this approach. The current development
+destination is in the `dev.cdp-int.defra.cloud` domain, rather than the illustrative
+`[service-name].[env].cdp.cloud` form. If the convention differs between environments, a single validated platform
+domain variable or an explicit mapping may still be needed; otherwise moving the addresses into application code would
+make routing less transparent and less safe than the current `cdp-app-config` approach.
+
+The hard `404` for an unmatched path is correct for the proxy's security and routing model. A convention-based
+downstream service is expected to be configured on a known path, such as `/dashboard`, so presentation logic and any
+user-facing error handling are always provided by that configured downstream service, not by the proxy. Its user
+impact still needs deliberate consideration: entry points, navigation, authentication return URLs, and user messaging
+must not leave users with a confusing journey when a path is missing or incorrect.
